@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RoPE Demo: Position as Rotation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="topbar" aria-label="Demo sections">
+        <a href="#methods">Methods</a>
+        <a href="#rope">RoPE</a>
+        <a href="#training">Training</a>
+      </nav>
+      <div class="hero__content">
+        <p class="eyebrow">Transformer positional encodings</p>
+        <h1>When attention loses order, position has to become geometry.</h1>
+        <p class="lede">
+          This demo uses the sentence from lecture, <strong>"I like black coffee"</strong>,
+          to compare position-vector methods and then trains a tiny attention
+          subproblem to show why relative position methods like RoPE generalize better.
+        </p>
+      </div>
+      <div class="hero__card">
+        <span class="card-number">1</span>
+        <p>Inspect the actual position numbers.</p>
+        <span class="card-number">2</span>
+        <p>Watch RoPE rotate query/key feature pairs.</p>
+        <span class="card-number">3</span>
+        <p>Train a toy attention head and compare generalization.</p>
+      </div>
+    </header>
+
+    <main>
+      <section id="methods" class="panel panel--methods">
+        <div class="panel__copy">
+          <p class="eyebrow">Part 1</p>
+          <h2>Different ways to turn position into a vector.</h2>
+          <p>
+            Self-attention compares tokens as a set unless we inject order.
+            The common move is to compute a position vector and combine it with
+            the token embedding. Select a method and token to see the actual
+            numbers used for that position.
+          </p>
+          <div class="sentence" id="sentenceTokens" aria-label="Example sentence tokens"></div>
+        </div>
+
+        <div class="method-card">
+          <label>
+            Encoding method
+            <select id="methodSelect">
+              <option value="index">Raw index scalar</option>
+              <option value="binary">Binary vector</option>
+              <option value="sinusoidal">Sinusoidal vector</option>
+              <option value="learned">Learned lookup vector</option>
+              <option value="rope">RoPE rotation angles</option>
+            </select>
+          </label>
+          <label>
+            Selected token position
+            <input id="tokenSlider" type="range" min="0" max="3" value="2" />
+            <span id="tokenValue">2</span>
+          </label>
+          <div class="formula" id="methodFormula"></div>
+          <div class="vector-readout" id="vectorReadout"></div>
+        </div>
+
+        <div class="canvas-card">
+          <canvas id="methodCanvas" width="680" height="430" aria-label="Position vector comparison"></canvas>
+        </div>
+      </section>
+
+      <section id="rope" class="panel panel--wide">
+        <div class="panel__copy">
+          <p class="eyebrow">Part 2</p>
+          <h2>RoPE uses rotations instead of adding a new vector.</h2>
+          <p>
+            RoPE groups hidden dimensions into 2D pairs. At position
+            <strong>m</strong>, pair <strong>i</strong> rotates by
+            <strong>m * theta<sub>i</sub></strong>. The dot product between query
+            position <strong>m</strong> and key position <strong>n</strong>
+            then depends on <strong>m - n</strong>.
+          </p>
+          <div class="formula">
+            <code>[x,y] -> [x cos(m theta) - y sin(m theta), x sin(m theta) + y cos(m theta)]</code>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="shift-demo">
+            <div class="shift-demo__sentences" id="shiftSentences"></div>
+            <button id="shiftButton" type="button">Shift sentence by +3</button>
+          </div>
+          <label>
+            Feature pair
+            <input id="pairSlider" type="range" min="0" max="7" value="2" />
+            <span id="pairValue">2</span>
+          </label>
+        </div>
+        <div class="canvas-card">
+          <canvas id="ropeCanvas" width="680" height="430" aria-label="RoPE relative rotation visualization"></canvas>
+        </div>
+        <div class="insight" id="ropeInsight"></div>
+      </section>
+
+      <section id="training" class="panel panel--training">
+        <div class="panel__copy">
+          <p class="eyebrow">Part 3</p>
+          <h2>A tiny transformer attention training task.</h2>
+          <p>
+            The toy model is one attention scorer. For each query position
+            <strong>m</strong>, it must put the most attention on the key at
+            <strong>m - 2</strong>. Use the sliders to train on short sequences
+            and test on longer sequences.
+          </p>
+          <p>
+            This isolates the positional part of a transformer: can the position
+            representation learn a relative rule and extrapolate beyond training
+            lengths?
+          </p>
+        </div>
+
+        <div class="training-controls">
+          <label>
+            Position method used by the attention scorer
+            <select id="trainMethodSelect">
+              <option value="none">No position</option>
+              <option value="index">Raw index scalar</option>
+              <option value="binary">Binary vector</option>
+              <option value="learned">Learned lookup vector</option>
+              <option value="sinusoidal">Sinusoidal vector</option>
+              <option value="rope" selected>RoPE relative rotation</option>
+            </select>
+          </label>
+          <label>
+            Training max length
+            <input id="trainLengthSlider" type="range" min="5" max="12" value="8" />
+            <span id="trainLengthValue">8</span>
+          </label>
+          <label>
+            Testing length
+            <input id="testLengthSlider" type="range" min="10" max="28" value="16" />
+            <span id="testLengthValue">16</span>
+          </label>
+          <div class="toolbar">
+            <button id="trainButton" type="button">Train / retrain</button>
+            <button id="compareButton" type="button">Compare all methods</button>
+          </div>
+          <div class="metric-grid">
+            <div>
+              <span class="metric-label">Train accuracy</span>
+              <strong id="trainAccuracy">0%</strong>
+            </div>
+            <div>
+              <span class="metric-label">Long-sequence accuracy</span>
+              <strong id="testAccuracy">0%</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas-card">
+          <canvas id="trainingCanvas" width="680" height="430" aria-label="Toy attention training results"></canvas>
+        </div>
+        <div class="position-strip" id="positionStrip"></div>
+        <div class="comparison-table" id="comparisonTable"></div>
+      </section>
+
+      <section class="takeaway">
+        <h2>Core takeaway</h2>
+        <p>
+          Absolute position encodings can tell a model where a token is. RoPE
+          changes query/key geometry so attention scores naturally depend on
+          how far two tokens are from each other, which is the pattern many
+          sequence tasks actually need.
+        </p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
