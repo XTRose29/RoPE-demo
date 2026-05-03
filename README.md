@@ -1,41 +1,30 @@
-# RoPE Demo: Position as Rotation
+# RoPE Playground: Spin the Tokens
 
-An interactive static demo explaining rotary positional embeddings (RoPE) for a
-class extra-credit submission.
+A concise, single-page interactive demo for explaining rotary position embeddings:
 
-## Run Locally
-
-Open `index.html` directly in a browser, or serve the folder with a simple local
-server. If port `8000` is already in use, switch to any free port such as
-`8010`.
-
-```bash
-python3 -m http.server 8000
-```
-
-Then visit `http://localhost:8000`.
+> RoPE does not add a position vector to tokens. It rotates query/key vectors by position, making attention scores naturally depend on relative distance.
 
 ## Files
 
-- `index.html`: demo structure and teaching flow
-- `styles.css`: visual design and responsive layout
-- `app.js`: RoPE math, controls, animation, and canvas visualizations
+- `index.html` - page structure and four classroom-focused tabs
+- `style.css` - responsive layout, token cards, vector plots, clocks, and heatmap styling
+- `script.js` - RoPE math, SVG drawing, sliders, dot products, and toy attention modes
 
-## Demo Goal
+## Run
 
-The demo has three parts:
+Open `index.html` directly in a browser, or serve the folder:
 
-- Compare concrete position-vector methods on the sentence `I like black coffee`.
-- Visualize RoPE as 2D rotations of query/key feature pairs, including a
-  "shift the whole sentence" interaction for `The dog chased the cat`.
-- Train a tiny attention scorer on the task "attend to position `m - 2`" and
-  compare how different position methods extrapolate as you change training
-  max length and testing length.
+```bash
+python3 -m http.server 8030
+```
 
-The training task is intentionally small: it isolates the positional part of a
-transformer attention layer rather than pretending to train a full language
-model in the browser.
+Then visit `http://127.0.0.1:8030/netID_rope_demo/`.
 
-The learned absolute embedding view intentionally grays out positions beyond
-the training max length because those positions have no learned lookup row in
-the toy setup. RoPE keeps computing `angle = position * theta`.
+## Demo Flow
+
+1. Why position information is needed
+2. Position as a 2D rotation for query/key vectors
+3. Relative distance emerging from the dot product
+4. Multi-frequency rotations plus a toy attention heatmap
+
+The heatmap is intentionally labeled as a toy visualization because real attention also depends on learned content vectors, not only distance.

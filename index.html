@@ -1,181 +1,154 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RoPE Demo: Position as Rotation</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RoPE Playground: Spin the Tokens</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <header class="hero">
-      <nav class="topbar" aria-label="Demo sections">
-        <a href="#methods">Methods</a>
-        <a href="#rope">RoPE</a>
-        <a href="#training">Training</a>
-      </nav>
-      <div class="hero__content">
-        <p class="eyebrow">Transformer positional encodings</p>
-        <h1>When attention loses order, position has to become geometry.</h1>
-        <p class="lede">
-          This demo uses the sentence from lecture, <strong>"I like black coffee"</strong>,
-          to compare position-vector methods and then trains a tiny attention
-          subproblem to show why relative position methods like RoPE generalize better.
-        </p>
-      </div>
-      <div class="hero__card">
-        <span class="card-number">1</span>
-        <p>Inspect the actual position numbers.</p>
-        <span class="card-number">2</span>
-        <p>Watch RoPE rotate query/key feature pairs.</p>
-        <span class="card-number">3</span>
-        <p>Train a toy attention head and compare generalization.</p>
-      </div>
-    </header>
-
-    <main>
-      <section id="methods" class="panel panel--methods">
-        <div class="panel__copy">
-          <p class="eyebrow">Part 1</p>
-          <h2>Different ways to turn position into a vector.</h2>
-          <p>
-            Self-attention compares tokens as a set unless we inject order.
-            The common move is to compute a position vector and combine it with
-            the token embedding. Select a method and token to see the actual
-            numbers used for that position.
-          </p>
-          <div class="sentence" id="sentenceTokens" aria-label="Example sentence tokens"></div>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">RoPE Playground</p>
+          <h1>Position as Rotation</h1>
+          <p class="subtitle">How rotary position embeddings turn token order into geometry</p>
         </div>
+        <nav class="tabs" aria-label="Demo steps">
+          <button class="tab active" data-tab="why">Why?</button>
+          <button class="tab" data-tab="rotate">Rotate Q/K</button>
+          <button class="tab" data-tab="relative">Relative</button>
+          <button class="tab" data-tab="attention">Multi-frequency + Attention</button>
+        </nav>
+      </header>
 
-        <div class="method-card">
-          <label>
-            Encoding method
-            <select id="methodSelect">
-              <option value="index">Raw index scalar</option>
-              <option value="binary">Binary vector</option>
-              <option value="sinusoidal">Sinusoidal vector</option>
-              <option value="learned">Learned lookup vector</option>
-              <option value="rope">RoPE rotation angles</option>
-            </select>
-          </label>
-          <label>
-            Selected token position
-            <input id="tokenSlider" type="range" min="0" max="3" value="2" />
-            <span id="tokenValue">2</span>
-          </label>
-          <div class="formula" id="methodFormula"></div>
-          <div class="vector-readout" id="vectorReadout"></div>
-        </div>
+      <section class="stage active" id="why">
+        <aside class="panel">
+          <p class="step">Step 1</p>
+          <h2>Why Position?</h2>
+          <p class="one-line">Transformers need position information because self-attention alone does not know token order.</p>
+          <div class="control-group">
+            <label class="switch-label" for="positionToggle">Position encoding</label>
+            <button class="segmented" id="positionToggle" aria-pressed="false">
+              <span class="selected" data-mode="off">Without</span>
+              <span data-mode="on">With</span>
+            </button>
+          </div>
+          <div class="formula note" id="whyNote">Self-attention sees token content, but position must be injected separately.</div>
+        </aside>
 
-        <div class="canvas-card">
-          <canvas id="methodCanvas" width="680" height="430" aria-label="Position vector comparison"></canvas>
+        <div class="visual why-visual">
+          <div class="sentence-block">
+            <h3>The cat chased the dog.</h3>
+            <div class="tokens" id="sentenceA"></div>
+          </div>
+          <div class="swap-arrow">order changes meaning</div>
+          <div class="sentence-block muted-sentence">
+            <h3>The dog chased the cat.</h3>
+            <div class="tokens" id="sentenceB"></div>
+          </div>
         </div>
       </section>
 
-      <section id="rope" class="panel panel--wide">
-        <div class="panel__copy">
-          <p class="eyebrow">Part 2</p>
-          <h2>RoPE uses rotations instead of adding a new vector.</h2>
-          <p>
-            RoPE groups hidden dimensions into 2D pairs. At position
-            <strong>m</strong>, pair <strong>i</strong> rotates by
-            <strong>m * theta<sub>i</sub></strong>. The dot product between query
-            position <strong>m</strong> and key position <strong>n</strong>
-            then depends on <strong>m - n</strong>.
-          </p>
-          <div class="formula">
-            <code>[x,y] -> [x cos(m theta) - y sin(m theta), x sin(m theta) + y cos(m theta)]</code>
+      <section class="stage" id="rotate">
+        <aside class="panel">
+          <p class="step">Step 2</p>
+          <h2>Rotate Q/K</h2>
+          <p class="one-line">RoPE encodes position by rotating query/key vectors instead of adding a position vector.</p>
+          <div class="control-group">
+            <label for="positionSlider">Position p: <strong id="positionValue">3</strong></label>
+            <input id="positionSlider" type="range" min="0" max="10" step="1" value="3">
           </div>
-        </div>
-        <div class="controls">
-          <div class="shift-demo">
-            <div class="shift-demo__sentences" id="shiftSentences"></div>
-            <button id="shiftButton" type="button">Shift sentence by +3</button>
+          <div class="formula">q<sub>p</sub> = R(pθ) q</div>
+          <div class="stats" id="rotateStats"></div>
+          <div class="formula small">
+            x' = x cos(pθ) - y sin(pθ)<br>
+            y' = x sin(pθ) + y cos(pθ)
           </div>
-          <label>
-            Feature pair
-            <input id="pairSlider" type="range" min="0" max="7" value="2" />
-            <span id="pairValue">2</span>
-          </label>
+        </aside>
+
+        <div class="visual">
+          <svg class="plot" id="rotatePlot" viewBox="0 0 640 520" role="img" aria-label="2D vector rotating by position">
+            <defs>
+              <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L9,3 L0,6 Z" fill="#2563eb"></path>
+              </marker>
+              <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L9,3 L0,6 Z" fill="#94a3b8"></path>
+              </marker>
+            </defs>
+          </svg>
         </div>
-        <div class="canvas-card">
-          <canvas id="ropeCanvas" width="680" height="430" aria-label="RoPE relative rotation visualization"></canvas>
-        </div>
-        <div class="insight" id="ropeInsight"></div>
       </section>
 
-      <section id="training" class="panel panel--training">
-        <div class="panel__copy">
-          <p class="eyebrow">Part 3</p>
-          <h2>A tiny transformer attention training task.</h2>
-          <p>
-            The toy model is one attention scorer. For each query position
-            <strong>m</strong>, it must put the most attention on the key at
-            <strong>m - 2</strong>. Use the sliders to train on short sequences
-            and test on longer sequences.
-          </p>
-          <p>
-            This isolates the positional part of a transformer: can the position
-            representation learn a relative rule and extrapolate beyond training
-            lengths?
-          </p>
-        </div>
-
-        <div class="training-controls">
-          <label>
-            Position method used by the attention scorer
-            <select id="trainMethodSelect">
-              <option value="none">No position</option>
-              <option value="index">Raw index scalar</option>
-              <option value="binary">Binary vector</option>
-              <option value="learned">Learned lookup vector</option>
-              <option value="sinusoidal">Sinusoidal vector</option>
-              <option value="rope" selected>RoPE relative rotation</option>
-            </select>
-          </label>
-          <label>
-            Training max length
-            <input id="trainLengthSlider" type="range" min="5" max="12" value="8" />
-            <span id="trainLengthValue">8</span>
-          </label>
-          <label>
-            Testing length
-            <input id="testLengthSlider" type="range" min="10" max="28" value="16" />
-            <span id="testLengthValue">16</span>
-          </label>
-          <div class="toolbar">
-            <button id="trainButton" type="button">Train / retrain</button>
-            <button id="compareButton" type="button">Compare all methods</button>
+      <section class="stage" id="relative">
+        <aside class="panel">
+          <p class="step">Step 3</p>
+          <h2>Relative Distance</h2>
+          <p class="one-line">When both query and key are rotated, their dot product depends on relative position.</p>
+          <div class="control-grid">
+            <label for="querySlider">Query position m: <strong id="queryValue">2</strong></label>
+            <input id="querySlider" type="range" min="0" max="10" step="1" value="2">
+            <label for="keySlider">Key position n: <strong id="keyValue">5</strong></label>
+            <input id="keySlider" type="range" min="0" max="10" step="1" value="5">
           </div>
+          <button class="action" id="shiftBoth">Shift both tokens +1</button>
           <div class="metric-grid">
             <div>
-              <span class="metric-label">Train accuracy</span>
-              <strong id="trainAccuracy">0%</strong>
+              <span>Relative offset Δ</span>
+              <strong id="deltaValue">3</strong>
             </div>
             <div>
-              <span class="metric-label">Long-sequence accuracy</span>
-              <strong id="testAccuracy">0%</strong>
+              <span>Attention score</span>
+              <strong id="scoreValue">0.00</strong>
             </div>
           </div>
-        </div>
+          <div class="formula">(R<sub>m</sub>q)<sup>T</sup>(R<sub>n</sub>k) = q<sup>T</sup>R<sub>n-m</sub>k</div>
+        </aside>
 
-        <div class="canvas-card">
-          <canvas id="trainingCanvas" width="680" height="430" aria-label="Toy attention training results"></canvas>
+        <div class="visual relative-visual">
+          <div class="token-pair">
+            <div class="token-card query-token">Query token m<br><strong>cat</strong></div>
+            <div class="token-card key-token">Key token n<br><strong>dog</strong></div>
+          </div>
+          <svg class="plot" id="relativePlot" viewBox="0 0 640 460" role="img" aria-label="Rotated query and key vectors"></svg>
         </div>
-        <div class="position-strip" id="positionStrip"></div>
-        <div class="comparison-table" id="comparisonTable"></div>
       </section>
 
-      <section class="takeaway">
-        <h2>Core takeaway</h2>
-        <p>
-          Absolute position encodings can tell a model where a token is. RoPE
-          changes query/key geometry so attention scores naturally depend on
-          how far two tokens are from each other, which is the pattern many
-          sequence tasks actually need.
-        </p>
+      <section class="stage" id="attention">
+        <aside class="panel">
+          <p class="step">Step 4</p>
+          <h2>Frequencies + Attention</h2>
+          <p class="one-line">In high dimensions, RoPE rotates many 2D vector pairs at different frequencies.</p>
+          <div class="control-group">
+            <label for="multiPosition">Position p: <strong id="multiPositionValue">8</strong></label>
+            <input id="multiPosition" type="range" min="0" max="24" step="1" value="8">
+          </div>
+          <div class="formula">θ<sub>i</sub> = 10000<sup>-2(i-1)/d</sup></div>
+          <p class="one-line second-line">This gives RoPE flexible sequence lengths and a natural distance-based decay pattern.</p>
+          <div class="control-group">
+            <label for="queryTokenSelect">Query token</label>
+            <select id="queryTokenSelect"></select>
+          </div>
+          <div class="mode-row" aria-label="Attention mode">
+            <button class="mode active" data-mode="none">No position</button>
+            <button class="mode" data-mode="sin">Additive sinusoidal</button>
+            <button class="mode" data-mode="rope">RoPE</button>
+          </div>
+          <div class="formula note">Toy visualization: attention also depends on learned content vectors, not only distance.</div>
+        </aside>
+
+        <div class="visual attention-visual">
+          <div class="clocks" id="clocks"></div>
+          <div class="heatmap-wrap">
+            <p class="sentence-small">The small cat quietly chased the dog near the river.</p>
+            <div class="heatmap" id="heatmap"></div>
+          </div>
+          <svg class="decay" id="decayPlot" viewBox="0 0 640 160" role="img" aria-label="Relative distance versus positional similarity"></svg>
+        </div>
       </section>
     </main>
 
-    <script src="app.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
