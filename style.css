@@ -38,9 +38,9 @@ select {
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto;
-  gap: 24px;
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
   margin-bottom: 22px;
 }
 
@@ -62,9 +62,10 @@ p {
 
 h1 {
   margin-bottom: 4px;
-  font-size: 3.6rem;
+  font-size: 3.25rem;
   line-height: 0.95;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .subtitle {
@@ -76,6 +77,7 @@ h1 {
 .tabs {
   display: flex;
   gap: 8px;
+  justify-self: end;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -85,8 +87,11 @@ h1 {
 
 .tab,
 .mode,
+.example-mode,
+.metric-mode,
 .action,
-.segmented {
+.segmented,
+.fullscreen-toggle {
   border: 0;
   border-radius: 7px;
   color: var(--ink);
@@ -104,6 +109,15 @@ h1 {
 .tab.active {
   color: white;
   background: var(--ink);
+}
+
+.fullscreen-toggle {
+  min-height: 38px;
+  padding: 0 13px;
+  color: white;
+  background: var(--position);
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .stage {
@@ -205,7 +219,9 @@ select {
 }
 
 .segmented span,
-.mode {
+.mode,
+.example-mode,
+.metric-mode {
   flex: 1;
   min-height: 34px;
   display: grid;
@@ -216,9 +232,15 @@ select {
 }
 
 .segmented span.selected,
-.mode.active {
+.mode.active,
+.example-mode.active,
+.metric-mode.active {
   color: white;
   background: var(--position);
+}
+
+.example-row {
+  margin: 20px 0 12px;
 }
 
 .formula {
@@ -240,6 +262,133 @@ select {
 .formula.note {
   color: #475569;
   font-family: inherit;
+}
+
+.pair-explainer {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.pair-explainer.compact {
+  margin-top: 16px;
+}
+
+.pair-explainer h3 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.pair-explainer p {
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.pair-explainer p:last-child {
+  margin-bottom: 0;
+}
+
+.vector-strip {
+  margin: 8px 0 10px;
+  padding: 10px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: white;
+  color: #334155;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.pair-map {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.pair-map span {
+  padding: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.22);
+  border-radius: 7px;
+  background: #f7f3ff;
+  color: #4c1d95;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.theta-box {
+  margin-top: 14px;
+  padding: 15px;
+  border: 1px solid #f1d47c;
+  border-radius: 8px;
+  background: var(--formula);
+  color: #594014;
+}
+
+.theta-box h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.theta-box p {
+  margin: 0 0 9px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.theta-box p:last-child {
+  margin-bottom: 0;
+}
+
+.inline-formula {
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.theta-info {
+  position: relative;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
+.theta-info::after {
+  content: "θ_i is the frequency/speed of rotation for one hidden-dimension pair. Larger θ means the pair spins faster as position increases.";
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 4;
+  width: min(260px, 72vw);
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+  color: white;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.theta-info:hover::after,
+.theta-info:focus::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .stats {
@@ -354,6 +503,17 @@ select {
   font-weight: 850;
 }
 
+.shift-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 4px 0 16px;
+}
+
+.shift-row .action {
+  margin: 0;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -379,75 +539,224 @@ select {
   font-size: 1.35rem;
 }
 
-.relative-visual {
+.frequency-visual {
   display: grid;
-  grid-template-rows: auto 1fr;
-}
-
-.token-pair {
-  display: flex;
-  justify-content: center;
+  align-content: start;
   gap: 14px;
-  margin-bottom: 12px;
-}
-
-.token-card {
-  min-width: 150px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: white;
-  color: var(--muted);
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 800;
-  transition: transform 180ms ease;
-}
-
-.token-card strong {
-  color: var(--ink);
-  font-size: 1.2rem;
-}
-
-.query-token {
-  border-color: rgba(37, 99, 235, 0.45);
-}
-
-.key-token {
-  border-color: rgba(22, 163, 74, 0.45);
 }
 
 .attention-visual {
   display: grid;
-  grid-template-rows: auto auto 170px;
+  align-content: center;
+  grid-template-rows: auto auto;
   gap: 20px;
 }
 
 .clocks {
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .clock {
-  padding: 14px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdff;
 }
 
 .clock svg {
-  width: 100%;
+  width: min(100%, 150px);
   aspect-ratio: 1;
   display: block;
+  justify-self: center;
 }
 
 .clock-title {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink);
   text-align: center;
   font-size: 0.82rem;
   font-weight: 850;
+}
+
+.clock-meta {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  font-weight: 850;
+}
+
+.clock-meta strong {
+  color: var(--position);
+}
+
+.position-scrubber {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.scrubber-label,
+.scrubber-ticks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.scrubber-label strong {
+  color: var(--position);
+  font-size: 1.35rem;
+}
+
+.scrubber-track {
+  position: relative;
+  height: 44px;
+  margin: 12px 6px 6px;
+  cursor: pointer;
+}
+
+.scrubber-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  transform: translateY(-50%);
+}
+
+.scrubber-track:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.32);
+  outline-offset: 2px;
+}
+
+.scrubber-fill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--position);
+  transform: translateY(-50%);
+}
+
+.scrubber-handle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: var(--position);
+  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.32);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+}
+
+.scrubber-handle:active {
+  cursor: grabbing;
+}
+
+.scrubber-ticks {
+  padding: 0 2px;
+  font-size: 0.76rem;
+}
+
+.numeric-example,
+.why-cards,
+.takeaway-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.numeric-example {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.numeric-example > strong {
+  color: var(--position);
+  font-size: 1.05rem;
+}
+
+.example-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.example-grid div {
+  padding: 10px;
+  border-radius: 8px;
+  background: #fbfdff;
+  color: #475569;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.example-grid strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.example-grid em {
+  color: var(--offset);
+  font-style: normal;
+  font-weight: 850;
+}
+
+.why-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+.why-cards article {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.why-cards h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.why-cards p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.takeaway-box {
+  padding: 13px 14px;
+  background: var(--formula);
+  color: #594014;
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1.45;
 }
 
 .heatmap-wrap {
@@ -458,11 +767,26 @@ select {
 }
 
 .sentence-small {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   color: #334155;
   font-size: 1.25rem;
   font-weight: 800;
   line-height: 1.25;
+}
+
+.heatmap-note,
+.decay-title {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 12px;
+  color: #475569;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.heatmap-note strong,
+.decay-title strong {
+  color: var(--ink);
 }
 
 .heatmap {
@@ -471,7 +795,13 @@ select {
   gap: 7px;
 }
 
+.heatmap.long-example {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 5px;
+}
+
 .heat-cell {
+  padding: 0;
   min-height: 68px;
   display: grid;
   align-content: center;
@@ -480,13 +810,28 @@ select {
   border: 1px solid rgba(22, 32, 51, 0.08);
   border-radius: 7px;
   color: #111827;
+  font: inherit;
   text-align: center;
   transition: transform 160ms ease, background 160ms ease;
+  cursor: pointer;
+}
+
+.heat-cell:hover {
+  transform: translateY(-2px);
 }
 
 .heat-cell.query {
   outline: 3px solid rgba(37, 99, 235, 0.28);
   transform: translateY(-3px);
+}
+
+.heatmap.long-example .heat-cell {
+  min-height: 44px;
+}
+
+.heatmap.long-example .heat-token,
+.heatmap.long-example .heat-score {
+  font-size: 0.66rem;
 }
 
 .heat-token {
@@ -505,10 +850,265 @@ select {
 
 .decay {
   width: 100%;
-  min-height: 160px;
+  min-height: 180px;
+}
+
+.decay-wrap {
+  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdff;
+}
+
+.training-status {
+  display: grid;
+  gap: 6px;
+  margin: 18px 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.training-status strong {
+  color: var(--position);
+  font-size: 1.05rem;
+}
+
+.training-methods,
+.method-notes {
+  display: grid;
+  gap: 8px;
+}
+
+.training-method {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--method-color);
+  border-radius: 8px;
+  background: white;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.training-method.active {
+  border-color: var(--method-color);
+  background: #fbfdff;
+  box-shadow: inset 0 0 0 2px rgba(124, 58, 237, 0.12);
+}
+
+.training-method strong {
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.training-method span {
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.training-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 16px 0 12px;
+}
+
+.train-action {
+  margin: 0;
+  min-height: 38px;
+  font-size: 0.82rem;
+}
+
+.metric-toggle {
+  margin-bottom: 14px;
+}
+
+.method-note {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--method-color);
+  border-radius: 8px;
+  background: white;
+}
+
+.method-note strong {
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.method-note span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.training-visual {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.training-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+}
+
+.task-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 16px;
+  align-items: center;
+}
+
+.card-kicker {
+  margin-bottom: 5px;
+  color: var(--position);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.training-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.sample-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.sample-sequence span {
+  min-width: 34px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fbfdff;
+  text-align: center;
+  font-weight: 850;
+}
+
+.sample-sequence span:nth-child(1),
+.sample-sequence span:nth-child(3) {
+  border-color: rgba(124, 58, 237, 0.36);
+  background: #f7f3ff;
+}
+
+.task-answer {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.task-answer span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.task-answer strong {
+  color: var(--ink);
+  font-size: 1.55rem;
+}
+
+.task-answer p,
+.prediction-question {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.card-head span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.training-chart {
+  width: 100%;
+  min-height: 260px;
+  display: block;
+}
+
+.training-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.result-table-wrap {
+  overflow-x: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.result-table th,
+.result-table td {
+  padding: 8px 7px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.result-table th {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.result-table tr.selected td {
+  background: #fbfdff;
+}
+
+.method-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+
+.final-target {
+  display: block;
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+
+.training-takeaway {
+  background: var(--formula);
 }
 
 @media (max-width: 900px) {
@@ -531,9 +1131,305 @@ select {
   }
 
   .clocks,
-  .heatmap {
+  .heatmap,
+  .why-cards,
+  .example-grid,
+  .pair-map {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .clocks {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .training-grid,
+  .task-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.fullscreen-mode {
+  overflow: hidden;
+}
+
+.app.fullscreen-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  width: 100vw;
+  height: 100vh;
+  padding: 12px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--bg);
+}
+
+.app.fullscreen-mode .topbar {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.app.fullscreen-mode .eyebrow,
+.app.fullscreen-mode .subtitle {
+  display: none;
+}
+
+.app.fullscreen-mode h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.app.fullscreen-mode .tabs {
+  justify-self: end;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.app.fullscreen-mode .tab,
+.app.fullscreen-mode .fullscreen-toggle {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.82rem;
+}
+
+.app.fullscreen-mode .stage.active {
+  min-height: 0;
+  height: 100%;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 12px;
+  overflow: hidden;
+}
+
+.app.fullscreen-mode .panel,
+.app.fullscreen-mode .visual {
+  min-height: 0;
+  height: 100%;
+  padding: 14px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.app.fullscreen-mode h2 {
+  font-size: 1.25rem;
+}
+
+.app.fullscreen-mode .one-line,
+.app.fullscreen-mode .pair-explainer p,
+.app.fullscreen-mode .theta-box p,
+.app.fullscreen-mode .takeaway-box,
+.app.fullscreen-mode .why-cards p {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.app.fullscreen-mode .formula,
+.app.fullscreen-mode .theta-box,
+.app.fullscreen-mode .pair-explainer,
+.app.fullscreen-mode .position-scrubber,
+.app.fullscreen-mode .numeric-example,
+.app.fullscreen-mode .why-cards,
+.app.fullscreen-mode .takeaway-box {
+  margin-top: 8px;
+  padding: 10px;
+}
+
+.app.fullscreen-mode .plot {
+  min-height: 0;
+  height: 100%;
+}
+
+.app.fullscreen-mode .sentence-block {
+  padding: 18px;
+}
+
+.app.fullscreen-mode .sentence-block h3 {
+  font-size: 1.75rem;
+}
+
+.app.fullscreen-mode .word-card {
+  min-width: 68px;
+  padding: 10px;
+}
+
+.app.fullscreen-mode .frequency-visual,
+.app.fullscreen-mode .attention-visual {
+  gap: 10px;
+}
+
+.app.fullscreen-mode .clocks {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.app.fullscreen-mode .clock {
+  padding: 10px;
+}
+
+.app.fullscreen-mode .clock svg {
+  width: min(100%, 128px);
+}
+
+.app.fullscreen-mode .clock-title {
+  font-size: 0.78rem;
+}
+
+.app.fullscreen-mode .clock-meta {
+  font-size: 0.7rem;
+}
+
+.app.fullscreen-mode .heatmap-wrap,
+.app.fullscreen-mode .decay-wrap {
+  padding: 12px;
+}
+
+.app.fullscreen-mode .training-visual {
+  grid-template-rows: auto 340px auto auto;
+  gap: 8px;
+}
+
+.app.fullscreen-mode .training-card {
+  padding: 10px;
+}
+
+.app.fullscreen-mode .task-card {
+  grid-template-columns: minmax(0, 1fr) 130px;
+}
+
+.app.fullscreen-mode .training-card h3 {
+  margin-bottom: 6px;
+  font-size: 0.94rem;
+}
+
+.app.fullscreen-mode .card-kicker,
+.app.fullscreen-mode .card-head span,
+.app.fullscreen-mode .task-answer p,
+.app.fullscreen-mode .prediction-question {
+  font-size: 0.66rem;
+}
+
+.app.fullscreen-mode .sample-sequence span {
+  min-width: 26px;
+  padding: 5px 7px;
+  font-size: 0.74rem;
+}
+
+.app.fullscreen-mode .task-answer {
+  padding: 8px;
+}
+
+.app.fullscreen-mode .task-answer strong {
+  font-size: 1.1rem;
+}
+
+.app.fullscreen-mode .training-chart {
+  min-height: 0;
+  height: 250px;
+}
+
+.app.fullscreen-mode .training-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  min-height: 0;
+}
+
+.app.fullscreen-mode .result-table {
+  font-size: 0.68rem;
+}
+
+.app.fullscreen-mode .result-table th,
+.app.fullscreen-mode .result-table td {
+  padding: 5px;
+}
+
+.app.fullscreen-mode .training-takeaway {
+  font-size: 0.72rem;
+  padding: 9px;
+}
+
+.app.fullscreen-mode .method-notes {
+  display: none;
+}
+
+.app.fullscreen-mode #training .one-line {
+  font-size: 0.74rem;
+}
+
+.app.fullscreen-mode #training .training-status {
+  margin: 10px 0;
+  padding: 9px;
+}
+
+.app.fullscreen-mode #training .training-method {
+  padding: 7px 9px;
+}
+
+.app.fullscreen-mode #training .training-method span {
+  display: none;
+}
+
+.app.fullscreen-mode #training .formula.note {
+  display: none;
+}
+
+.app.fullscreen-mode #training .curve-card {
+  overflow: hidden;
+}
+
+.app.fullscreen-mode #training .result-card {
+  min-height: 0;
+  overflow: visible;
+}
+
+.app.fullscreen-mode #training .result-table {
+  font-size: 0.82rem;
+}
+
+.app.fullscreen-mode #training .result-table th {
+  font-size: 0.82rem;
+}
+
+.app.fullscreen-mode #training .result-table td {
+  padding: 9px 8px;
+  font-size: 0.82rem;
+}
+
+.app.fullscreen-mode .training-controls {
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+
+.app.fullscreen-mode .train-action {
+  min-height: 30px;
+  font-size: 0.72rem;
+}
+
+.app.fullscreen-mode .sentence-small {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.app.fullscreen-mode .heatmap-note,
+.app.fullscreen-mode .decay-title {
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+}
+
+.app.fullscreen-mode .heat-cell {
+  min-height: 50px;
+}
+
+.app.fullscreen-mode .heatmap.long-example {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.app.fullscreen-mode .heatmap.long-example .heat-cell {
+  min-height: 34px;
+}
+
+.app.fullscreen-mode .decay {
+  min-height: 135px;
 }
 
 @media (max-width: 560px) {
@@ -550,24 +1446,37 @@ select {
 
   h1 {
     font-size: 2.45rem;
+    white-space: normal;
   }
 
   .sentence-block h3 {
     font-size: 2rem;
   }
 
-  .tokens,
-  .token-pair {
+  .tokens {
     gap: 8px;
   }
 
-  .word-card,
-  .token-card {
+  .word-card {
     min-width: 0;
     flex: 1 1 118px;
   }
 
   .heatmap {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heatmap.long-example {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .clocks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .why-cards,
+  .example-grid,
+  .pair-map {
+    grid-template-columns: 1fr;
   }
 }

@@ -11,14 +11,17 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">RoPE Playground</p>
-          <h1>Position as Rotation</h1>
+          <h1>Rotation Is All You Need</h1>
           <p class="subtitle">How rotary position embeddings turn token order into geometry</p>
         </div>
         <nav class="tabs" aria-label="Demo steps">
           <button class="tab active" data-tab="why">Why?</button>
           <button class="tab" data-tab="rotate">Rotate Q/K</button>
           <button class="tab" data-tab="relative">Relative</button>
-          <button class="tab" data-tab="attention">Multi-frequency + Attention</button>
+          <button class="tab" data-tab="frequency">Multi-frequency</button>
+          <button class="tab" data-tab="attention">Attention</button>
+          <button class="tab" data-tab="training">Training</button>
+          <button class="fullscreen-toggle" id="fullscreenToggle" type="button" aria-pressed="false">Full screen</button>
         </nav>
       </header>
 
@@ -92,7 +95,10 @@
             <label for="keySlider">Key position n: <strong id="keyValue">5</strong></label>
             <input id="keySlider" type="range" min="0" max="10" step="1" value="5">
           </div>
-          <button class="action" id="shiftBoth">Shift both tokens +1</button>
+          <div class="shift-row">
+            <button class="action" id="shiftBack">Shift both tokens -1</button>
+            <button class="action" id="shiftBoth">Shift both tokens +1</button>
+          </div>
           <div class="metric-grid">
             <div>
               <span>Relative offset Δ</span>
@@ -106,29 +112,88 @@
           <div class="formula">(R<sub>m</sub>q)<sup>T</sup>(R<sub>n</sub>k) = q<sup>T</sup>R<sub>n-m</sub>k</div>
         </aside>
 
-        <div class="visual relative-visual">
-          <div class="token-pair">
-            <div class="token-card query-token">Query token m<br><strong>cat</strong></div>
-            <div class="token-card key-token">Key token n<br><strong>dog</strong></div>
-          </div>
+        <div class="visual">
           <svg class="plot" id="relativePlot" viewBox="0 0 640 460" role="img" aria-label="Rotated query and key vectors"></svg>
+        </div>
+      </section>
+
+      <section class="stage" id="frequency">
+        <aside class="panel">
+          <p class="step">Step 4</p>
+          <h2>Multi-frequency RoPE</h2>
+          <p class="one-line">RoPE splits a high-dimensional query/key vector into 2D pairs. Each pair rotates like a small clock.</p>
+          <div class="pair-explainer compact">
+            <h3>What is a 2D pair?</h3>
+            <p>Example query/key vector:</p>
+            <div class="vector-strip">q = [x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>, x<sub>4</sub>, x<sub>5</sub>, x<sub>6</sub>, x<sub>7</sub>, x<sub>8</sub>]</div>
+            <div class="pair-map" aria-label="RoPE vector pairs">
+              <span>Pair 1 = (x<sub>1</sub>, x<sub>2</sub>)</span>
+              <span>Pair 2 = (x<sub>3</sub>, x<sub>4</sub>)</span>
+              <span>Pair 3 = (x<sub>5</sub>, x<sub>6</sub>)</span>
+              <span>Pair 4 = (x<sub>7</sub>, x<sub>8</sub>)</span>
+            </div>
+            <p>RoPE treats every two hidden dimensions as a point on a 2D plane, then rotates that point.</p>
+          </div>
+          <div class="theta-box">
+            <h3>What is <span class="theta-info" tabindex="0">θ<sub>i</sub></span>?</h3>
+            <p><strong>θ<sub>i</sub></strong> = rotation speed for pair i</p>
+            <div class="formula inline-formula"><span class="theta-info" tabindex="0">angle<sub>i</sub></span> = position p × θ<sub>i</sub></div>
+            <p>θ<sub>i</sub> does not directly store the position. It tells each pair how fast to rotate when the position changes.</p>
+          </div>
+          <div class="pair-explainer compact">
+            <h3>Why different θ?</h3>
+            <p>Large θ values rotate quickly and capture local order. Small θ values rotate slowly and help with long-range structure.</p>
+          </div>
+        </aside>
+
+        <div class="visual frequency-visual">
+          <div class="position-scrubber" id="positionScrubber">
+            <div class="scrubber-label">
+              <span>Drag position p</span>
+              <strong id="scrubberValue">8</strong>
+            </div>
+            <div class="scrubber-track" id="scrubberTrack" role="slider" aria-label="Drag position p" aria-valuemin="0" aria-valuemax="48" aria-valuenow="8" tabindex="0">
+              <div class="scrubber-fill" id="scrubberFill"></div>
+              <button class="scrubber-handle" id="scrubberHandle" type="button" aria-label="Position handle"></button>
+            </div>
+            <div class="scrubber-ticks">
+              <span>0</span>
+              <span>12</span>
+              <span>24</span>
+              <span>36</span>
+              <span>48</span>
+            </div>
+          </div>
+          <div class="numeric-example" id="numericExample"></div>
+          <div class="clocks" id="clocks"></div>
+          <div class="why-cards">
+            <article>
+              <h3>Fast clocks</h3>
+              <p>Early pairs have larger θ, so they rotate quickly. This helps distinguish nearby positions and local word order.</p>
+            </article>
+            <article>
+              <h3>Slow clocks</h3>
+              <p>Later pairs have smaller θ, so they rotate slowly. This helps preserve long-range position patterns.</p>
+            </article>
+          </div>
+          <div class="takeaway-box">
+            RoPE is a positional embedding because position p changes the query/key vector. Instead of adding a position vector, RoPE rotates each 2D pair by p × θ<sub>i</sub>.
+          </div>
         </div>
       </section>
 
       <section class="stage" id="attention">
         <aside class="panel">
-          <p class="step">Step 4</p>
-          <h2>Frequencies + Attention</h2>
-          <p class="one-line">In high dimensions, RoPE rotates many 2D vector pairs at different frequencies.</p>
-          <div class="control-group">
-            <label for="multiPosition">Position p: <strong id="multiPositionValue">8</strong></label>
-            <input id="multiPosition" type="range" min="0" max="24" step="1" value="8">
-          </div>
-          <div class="formula">θ<sub>i</sub> = 10000<sup>-2(i-1)/d</sup></div>
-          <p class="one-line second-line">This gives RoPE flexible sequence lengths and a natural distance-based decay pattern.</p>
+          <p class="step">Step 5</p>
+          <h2>Attention Decay</h2>
+          <p class="one-line">This gives RoPE flexible sequence lengths and a natural distance-based decay pattern.</p>
           <div class="control-group">
             <label for="queryTokenSelect">Query token</label>
             <select id="queryTokenSelect"></select>
+          </div>
+          <div class="mode-row example-row" aria-label="Attention example">
+            <button class="example-mode active" data-example="sentence">Sentence</button>
+            <button class="example-mode" data-example="long">Long periodic</button>
           </div>
           <div class="mode-row" aria-label="Attention mode">
             <button class="mode active" data-mode="none">No position</button>
@@ -139,16 +204,107 @@
         </aside>
 
         <div class="visual attention-visual">
-          <div class="clocks" id="clocks"></div>
           <div class="heatmap-wrap">
-            <p class="sentence-small">The small cat quietly chased the dog near the river.</p>
+            <p class="sentence-small" id="attentionExampleTitle">The small cat quietly chased the dog near the river.</p>
+            <div class="heatmap-note">
+              <strong>Click any token box to use it as the query token.</strong>
+              <span>These are normalized visualization scores, not real trained attention probabilities.</span>
+            </div>
             <div class="heatmap" id="heatmap"></div>
           </div>
-          <svg class="decay" id="decayPlot" viewBox="0 0 640 160" role="img" aria-label="Relative distance versus positional similarity"></svg>
+          <div class="decay-wrap">
+            <div class="decay-title">
+              <strong>Toy similarity from selected query token</strong>
+              <span>These are visualization scores, not real trained attention probabilities.</span>
+            </div>
+            <svg class="decay" id="decayPlot" viewBox="0 0 640 180" role="img" aria-label="Toy similarity by key token position"></svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="stage" id="training">
+        <aside class="panel">
+          <p class="step">Step 6</p>
+          <h2>Tiny Transformer Training</h2>
+          <p class="one-line">We train a tiny Transformer on a simple order task: decide whether A appears before B. This task is easy only if the model knows token order.</p>
+          <div class="training-status">
+            <span>Replay from local tiny Transformer training</span>
+            <strong id="trainingStepValue">Step 0 / 100</strong>
+          </div>
+          <div class="training-methods" id="trainingMethodButtons" aria-label="Training method selector"></div>
+          <div class="training-controls">
+            <button class="action train-action" id="playTraining">Play training</button>
+            <button class="action train-action" id="pauseTraining">Pause</button>
+            <button class="action train-action" id="resetTraining">Reset</button>
+            <button class="action train-action" id="compareTraining">Compare all</button>
+          </div>
+          <div class="mode-row metric-toggle" aria-label="Training chart metric">
+            <button class="metric-mode active" data-metric="accuracy">Accuracy</button>
+            <button class="metric-mode" data-metric="loss">Loss</button>
+          </div>
+          <div class="method-notes" id="methodNotes"></div>
+          <div class="formula note">This is a tiny toy experiment for visualization, not a full language model.</div>
+        </aside>
+
+        <div class="visual training-visual">
+          <div class="training-card task-card">
+            <div>
+              <p class="card-kicker">Order classification task</p>
+              <h3>Does A appear before B?</h3>
+              <div class="sample-sequence" aria-label="Sample training task">
+                <span>B</span><span>D</span><span>A</span><span>C</span><span>E</span><span>F</span><span>G</span><span>H</span>
+              </div>
+            </div>
+            <div class="task-answer">
+              <span>True label</span>
+              <strong>No</strong>
+              <p>Same tokens, different order, different label.</p>
+            </div>
+          </div>
+
+          <div class="training-card curve-card">
+            <div class="card-head">
+              <div>
+                <p class="card-kicker">Precomputed replay</p>
+                <h3 id="trainingChartTitle">Validation accuracy over training</h3>
+              </div>
+              <span>Train length 8 · Test length 16</span>
+            </div>
+            <svg class="training-chart" id="trainingChart" viewBox="0 0 760 260" role="img" aria-label="Tiny Transformer training curves"></svg>
+          </div>
+
+          <div class="training-grid">
+            <div class="training-card result-card">
+              <div class="card-head">
+                <div>
+                  <p class="card-kicker">Toy experiment results</p>
+                  <h3>Final comparison</h3>
+                </div>
+              </div>
+              <div class="result-table-wrap">
+                <table class="result-table" id="resultTable">
+                  <thead>
+                    <tr>
+                      <th>Method</th>
+                      <th>Train length 8</th>
+                      <th>Test length 16</th>
+                      <th>Takeaway</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="takeaway-box training-takeaway">
+            Takeaway: positional encoding changes what self-attention can learn. RoPE encodes position by rotating query/key vectors, which makes relative position visible inside the attention dot product.
+          </div>
         </div>
       </section>
     </main>
 
+    <script src="training_replay_data.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
