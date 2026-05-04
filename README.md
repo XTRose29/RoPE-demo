@@ -1,43 +1,25 @@
 # RoPE Playground: Spin the Tokens
 
-A concise, single-page interactive demo for explaining rotary position embeddings:
+**RoPE Playground** is a single-page interactive demo that explains rotary position embeddings through visual, hands-on examples.
 
-> RoPE does not add a position vector to tokens. It rotates query/key vectors by position, making attention scores naturally depend on relative distance.
+The main idea of the demo is:
+
+> RoPE does not add a separate position vector to tokens. Instead, it rotates query and key vectors based on position, so attention scores can naturally depend on relative distance.
+
+This demo is designed for students who are learning positional embeddings and Transformer attention for the first time.
 
 ## Files
 
-- `index.html` - page structure and six classroom-focused tabs
-- `style.css` - responsive layout, token cards, vector plots, clocks, heatmaps, and training cards
-- `script.js` - RoPE math, SVG drawing, sliders, dot products, toy attention modes, and training replay data
-- `scripts/train_tiny_order.py` - local TensorFlow script for the A-before-B training task
-- `training_replay_data.json` - generated real tiny-training replay data
-- `training_replay_data.js` - same replay data wrapped for direct browser loading from `file://`
+- `index.html` — Main page structure with six classroom-focused demo tabs
+- `style.css` — Styling for the layout, token cards, vector plots, clocks, heatmaps, and training cards
+- `script.js` — RoPE math, SVG visualizations, sliders, dot products, toy attention modes, and interaction logic
+- `training_replay_data.json` — Precomputed tiny Transformer training replay data
+- `training_replay_data.js` — Same replay data wrapped for direct browser loading
+- `scripts/train_tiny_order.py` — Local TensorFlow script used to regenerate the A-before-B training replay
 
-## Run
+## How to Run
 
-Open `index.html` directly in a browser, or serve the folder:
-
-```bash
-python3 -m http.server 8030
-```
-
-Then visit `http://127.0.0.1:8030/`.
-
-## Demo Flow
-
-1. Why position information is needed
-2. Position as a 2D rotation for query/key vectors
-3. Relative distance emerging from the dot product
-4. Multi-frequency rotations across four 2D pairs with a draggable position control
-5. A toy attention heatmap plus long-distance decay curve
-6. A precomputed tiny Transformer training replay for an order-sensitive task
-
-The heatmap is intentionally labeled as a toy visualization because real attention also depends on learned content vectors, not only distance.
-
-## Regenerate Training Replay
+You can open the demo directly in a browser:
 
 ```bash
-python3 scripts/train_tiny_order.py
-```
-
-The script trains four tiny attention models on the A-before-B order task and rewrites `training_replay_data.json` plus `training_replay_data.js`.
+open index.html
